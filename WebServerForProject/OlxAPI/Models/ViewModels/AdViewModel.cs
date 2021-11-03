@@ -13,5 +13,6 @@ namespace OlxAPI.Models.ViewModels
         public string UserId { get; set; }
         public IEnumerable<CategoryViewModel> Categories { get; set; }
         public IEnumerable<string> Images { get; set; }
+        public DateTime ChangeDate { get; set; }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OlxAPI.Models.PostModels;
 using OlxAPI.Models.ViewModels;
@@ -37,9 +39,11 @@ namespace OlxAPI.Controllers
             return _mapper.Map<AdViewModel>(model);
         }
         [HttpPost]
+        [Authorize(Roles = "User")]
         public async Task<AdViewModel> CreateAsync([FromBody] AdPostModel postModel)
         {
             var model = _mapper.Map<AdModel>(postModel);
+            model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
             model = await _adsService.CreateAsync(model);
             return _mapper.Map<AdViewModel>(model);
         }
@@ -51,11 +55,12 @@ namespace OlxAPI.Controllers
         }
         [Route("{id}")]
         [HttpPut]
-        
+        [Authorize(Roles = "User")]
         public async Task<AdViewModel> UpdateAsync([FromBody]AdPostModel postModel, int id)
         {
             var model = _mapper.Map<AdModel>(postModel);
             model.Id = id;
+            model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
             model = await _adsService.UpdateAsync(model);
             return _mapper.Map<AdViewModel>(model);
         }

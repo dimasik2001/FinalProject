@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OlxAPI.Data;
 
 namespace OlxAPI.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211103115337_addRoles")]
+    partial class addRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,17 +50,15 @@ namespace OlxAPI.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4c6d8398-466a-45b5-b7cf-9cff37ae030a",
-                            ConcurrencyStamp = "7d6d2537-91b1-4658-b1af-1a2667dd3152",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
+                            Id = "e29696c8-922e-48a6-b174-e6d4a45657a9",
+                            ConcurrencyStamp = "448c7990-81b5-418c-85dd-0ea39ab00d3c",
+                            Name = "Admin"
                         },
                         new
                         {
-                            Id = "b34a5c68-0d45-4070-a71a-3722ea99a019",
-                            ConcurrencyStamp = "c2facc5a-e443-4d04-9dd4-2f0db2b19a97",
-                            Name = "User",
-                            NormalizedName = "USER"
+                            Id = "e23fd5b5-7b22-4c0d-a0fc-ca0e24eac5bb",
+                            ConcurrencyStamp = "58155875-9c74-41b4-8acd-7f9646d995bd",
+                            Name = "User"
                         });
                 });
 

@@ -53,6 +53,10 @@ namespace OlxAPI.Data.Repositories
         public async Task<Ad> UpdateAsync(Ad ad)
         {
             var current = await _ctx.Ads.FindAsync(ad.Id);
+            if(!(current.UserId == ad.UserId))
+            {
+                return null;
+            }
             _ctx.AdsCategories.RemoveRange(_ctx.AdsCategories.Where(c => c.AdId == ad.Id));
             current.Header = ad.Header;
             current.Description = ad.Description;

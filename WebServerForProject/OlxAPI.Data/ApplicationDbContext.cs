@@ -59,6 +59,12 @@ namespace OlxAPI.Data
                 Name = "Other",
             }
             );
+            var admin = new IdentityRole("Admin");
+            admin.NormalizedName = admin.Name.ToUpper();
+            var user = new IdentityRole("User");
+            user.NormalizedName = user.Name.ToUpper();
+            builder.Entity<IdentityRole>().HasData(
+                admin, user);
         }
     }
 }
