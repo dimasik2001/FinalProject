@@ -14,5 +14,6 @@ namespace OlxAPI.Models.ViewModels
         public IEnumerable<CategoryViewModel> Categories { get; set; }
         public IEnumerable<string> Images { get; set; }
         public DateTime ChangeDate { get; set; }
+        public decimal Price { get; set; }
     }
 }

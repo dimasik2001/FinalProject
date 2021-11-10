@@ -7,7 +7,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OlxAPI.Models.PostModels;
+using OlxAPI.Models.PostModels.Parameters;
 using OlxAPI.Models.ViewModels;
+using OlxAPI.Models.ViewModels.Parameters;
 using OlxAPI.Services.Models;
 using OlxAPI.Services.Services.Abstractions;
 
@@ -26,11 +28,20 @@ namespace OlxAPI.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public async Task<IEnumerable<AdViewModel>> GetAsync()
+        public async Task<object> GetAsync([FromQuery]PaginationQueryParameters paginationParams,
+            [FromQuery] FilterQueryParameters filterParams,
+            [FromQuery] SortQueryParameters sortParams)
         {
-            var model = await _adsService.GetAsync();
-            return _mapper.Map<IEnumerable<AdViewModel>>(model);
+            var paginationModel = _mapper.Map<PaginationParametersModel>(paginationParams);
+            var filterModel = _mapper.Map<FilterParametersModel>(filterParams);
+            var sortModel = _mapper.Map<SortParametersModel>(sortParams);
+            var adModel = await _adsService.GetAsync(paginationModel, filterModel, sortModel);
+            var AdViewModel = _mapper.Map<IEnumerable<AdViewModel>>(adModel);
+            var parametersViewModel = _mapper.Map<PaginationParametersModel>(paginationModel);
+            return new { Ad = AdViewModel, paginationParameters = parametersViewModel };
         }
+
+
         [Route("{id}")]
         [HttpGet]
         public async Task<AdViewModel> GetByIdAsync(int id)
@@ -44,8 +55,8 @@ namespace OlxAPI.Controllers
         {
             var model = _mapper.Map<AdModel>(postModel);
             model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            model = await _adsService.CreateAsync(model);
-            return _mapper.Map<AdViewModel>(model);
+            var newModel = await _adsService.CreateAsync(model);
+            return _mapper.Map<AdViewModel>(newModel);
         }
         [Route("{id}")]
         [HttpDelete]
@@ -61,8 +72,8 @@ namespace OlxAPI.Controllers
             var model = _mapper.Map<AdModel>(postModel);
             model.Id = id;
             model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            model = await _adsService.UpdateAsync(model);
-            return _mapper.Map<AdViewModel>(model);
+            var newModel = await _adsService.UpdateAsync(model);
+            return _mapper.Map<AdViewModel>(newModel);
         }
 
     }

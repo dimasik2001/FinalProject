@@ -9,6 +9,7 @@ namespace OlxAPI.Data.Entities
         public string Header { get; set; }
         public string Description { get; set; }
         public DateTime ChangeDate { get; set; }
+        public decimal Price { get; set; }
         public string UserId { get; set; }
         public User User { get; set; }
         public IEnumerable<AdsCategories> AdsCategories { get; set; }

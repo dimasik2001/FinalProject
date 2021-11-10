@@ -9,6 +9,7 @@ namespace OlxAPI.Models.PostModels
     {
         public string Header { get; set; }
         public string Description { get; set; }
+        public decimal Price { get; set; }
         public IEnumerable<CategoryPostModel> Categories { get; set; }
         public IEnumerable<string> Images { get; set; }
     }

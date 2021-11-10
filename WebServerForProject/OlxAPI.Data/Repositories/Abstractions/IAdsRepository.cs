@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using OlxAPI.Data.Entities;
+using OlxAPI.Data.Parameters;
 
 namespace OlxAPI.Data.Repositories.Abstractions
 {
     public interface IAdsRepository
     {
-        Task<Ad> CreateAsync(Ad ad);
+        Task CreateAsync(Ad ad);
         Task DeleteAsync(int id);
-        Task<IEnumerable<Ad>> GetAsync();
-        Task<Ad> GetAsync(int id);
-        Task<Ad> UpdateAsync(Ad ad);
+        Task<IEnumerable<Ad>> GetAsync(PaginationParameters pagination,
+            FilterParameters filter = null,
+            SortParameters sort = null);
+        Task<Ad> GetByIdAsync(int id);
+        Task UpdateAsync(Ad ad);
     }
 }

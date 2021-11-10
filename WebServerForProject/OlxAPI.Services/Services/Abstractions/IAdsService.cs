@@ -8,7 +8,9 @@ namespace OlxAPI.Services.Services.Abstractions
     {
         Task<AdModel> CreateAsync(AdModel model);
         Task DeleteAsync(int id);
-        Task<IEnumerable<AdModel>> GetAsync();
+        Task<IEnumerable<AdModel>> GetAsync(PaginationParametersModel paginationModel,
+            FilterParametersModel filterModel,
+            SortParametersModel sortModel);
         Task<AdModel> GetAsync(int id);
         Task<AdModel> UpdateAsync(AdModel model);
     }
