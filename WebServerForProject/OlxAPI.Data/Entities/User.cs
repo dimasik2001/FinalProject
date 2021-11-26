@@ -7,6 +7,7 @@ namespace OlxAPI.Data.Entities
 {
     public class User : IdentityUser
     {
-        public IEnumerable<Ad> Ads { get; set; }
+        public string ImagePath { get; set; }
+        public ICollection<Ad> Ads { get; set; }
     }
 }

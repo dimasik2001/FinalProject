@@ -13,7 +13,7 @@ namespace OlxAPI.Services.Models
         public decimal Price { get; set; }
         public string UserId { get; set; }
         public UserModel User { get; set; }
-        public IEnumerable<CategoryModel> Categories { get; set; }
-        public IEnumerable<string> Images { get; set; }
+        public ICollection<CategoryModel> Categories { get; set; }
+        public ICollection<string> Images { get; set; }
     }
 }

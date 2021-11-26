@@ -7,6 +7,7 @@ using AutoMapper;
 using OlxAPI.Data.Entities;
 using OlxAPI.Data.Parameters;
 using OlxAPI.Enums;
+using OlxAPI.Models.DeleteModels;
 using OlxAPI.Models.PostModels;
 using OlxAPI.Models.PostModels.Parameters;
 using OlxAPI.Models.ViewModels;
@@ -20,6 +21,7 @@ namespace OlxAPI.Mapper
         public MapperProfile()
         {
             //PL
+            CreateMap<AdDeleteModel, AdModel>();
             CreateMap<AdModel, AdViewModel>();
             CreateMap<CategoryModel, CategoryViewModel>();
             CreateMap<AdPostModel, AdModel>();
@@ -28,6 +30,7 @@ namespace OlxAPI.Mapper
             CreateMap<PaginationParametersModel, PaginationParametersViewModel>();
             CreateMap<FilterQueryParameters, FilterParametersModel>();
             CreateMap<SortQueryParameters, SortParametersModel>();
+            CreateMap<User, UserViewModel>();
 
             //BL
             CreateMap<PaginationParametersModel, PaginationParameters>();
@@ -108,24 +111,34 @@ namespace OlxAPI.Mapper
             CreateMap<CategoryModel, AdsCategories>().ForMember(entity => entity.CategoryId,
                opts => opts.MapFrom(model => model.Id))
                 .ForMember(entity => entity.Id, opts => opts.Ignore());
-            CreateMap<Image, string>();
+            CreateMap<ICollection<Image>, IEnumerable<string>>()
+                .ConvertUsing((src, dest, ctx) =>
+                {
+                    var list = new List<string>();
+                    foreach (var image in src)
+                    {
+                        list.Add(image.Path);
+                    }
+                    dest = list;
+                    return dest;
+                });
+            CreateMap<Image, string>()
+                .ConvertUsing((src, dest, ctx) =>
+                {
+                    dest = src.Path;
+                    return dest;
+                });
             CreateMap<Ad, AdModel>()
                 .ForMember(model => model.Categories,
                 opts => opts
-                .MapFrom(entity => entity.AdsCategories))
-                .ForMember(model => model.Images,
-                opts => opts
-                .MapFrom(entity => entity.Images.Select(t => new { Image = t.Path })));
+                .MapFrom(entity => entity.AdsCategories));
             CreateMap<CategoryModel, Category>();
             CreateMap<Category, CategoryModel>();
             CreateMap<Image, string>();
             CreateMap<AdModel, Ad>()
                 .ForMember(entity => entity.AdsCategories,
                 opts => opts
-                .MapFrom(model => model.Categories))
-                .ForMember(entity => entity.Images,
-                opts => opts
-                .MapFrom(model => model.Images.Select(t => new {Path = t})));
+                .MapFrom(model => model.Categories));
         }
     }
 

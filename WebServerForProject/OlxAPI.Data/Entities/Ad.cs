@@ -12,7 +12,7 @@ namespace OlxAPI.Data.Entities
         public decimal Price { get; set; }
         public string UserId { get; set; }
         public User User { get; set; }
-        public IEnumerable<AdsCategories> AdsCategories { get; set; }
-        public IEnumerable<Image> Images { get; set; }
+        public ICollection<AdsCategories> AdsCategories { get; set; }
+        public ICollection<Image> Images { get; set; }
     }
 }

@@ -8,6 +8,6 @@ namespace OlxAPI.Data.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public IEnumerable<AdsCategories> AdsCategories { get; set; }
+        public ICollection<AdsCategories> AdsCategories { get; set; }
     }
 }

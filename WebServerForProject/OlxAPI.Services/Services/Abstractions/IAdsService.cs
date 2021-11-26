@@ -7,7 +7,7 @@ namespace OlxAPI.Services.Services.Abstractions
     public interface IAdsService
     {
         Task<AdModel> CreateAsync(AdModel model);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(AdModel model);
         Task<IEnumerable<AdModel>> GetAsync(PaginationParametersModel paginationModel,
             FilterParametersModel filterModel,
             SortParametersModel sortModel);

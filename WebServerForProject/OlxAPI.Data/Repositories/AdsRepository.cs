@@ -51,6 +51,7 @@ namespace OlxAPI.Data.Repositories
                 .Take(takeCount)
                 .Include(a => a.AdsCategories)
                 .ThenInclude(c => c.Category)
+                .Include(a => a.Images)
                 .AsNoTracking()
                 .ToListAsync();
         }

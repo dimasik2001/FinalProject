@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OlxAPI.Models.DeleteModels;
 using OlxAPI.Models.PostModels;
 using OlxAPI.Models.PostModels.Parameters;
 using OlxAPI.Models.ViewModels;
@@ -27,6 +28,7 @@ namespace OlxAPI.Controllers
             _adsService = adsService;
             _mapper = mapper;
         }
+
         [HttpGet]
         public async Task<object> GetAsync([FromQuery]PaginationQueryParameters paginationParams,
             [FromQuery] FilterQueryParameters filterParams,
@@ -38,6 +40,7 @@ namespace OlxAPI.Controllers
             var adModel = await _adsService.GetAsync(paginationModel, filterModel, sortModel);
             var AdViewModel = _mapper.Map<IEnumerable<AdViewModel>>(adModel);
             var parametersViewModel = _mapper.Map<PaginationParametersModel>(paginationModel);
+
             return new { Ad = AdViewModel, paginationParameters = parametersViewModel };
         }
 
@@ -49,6 +52,7 @@ namespace OlxAPI.Controllers
             var model = await _adsService.GetAsync(id);
             return _mapper.Map<AdViewModel>(model);
         }
+
         [HttpPost]
         [Authorize(Roles = "User")]
         public async Task<AdViewModel> CreateAsync([FromBody] AdPostModel postModel)
@@ -58,12 +62,16 @@ namespace OlxAPI.Controllers
             var newModel = await _adsService.CreateAsync(model);
             return _mapper.Map<AdViewModel>(newModel);
         }
-        [Route("{id}")]
+
         [HttpDelete]
-        public async Task DeleteAsync(int id)
+        [Authorize(Roles = "User")]
+        public async Task DeleteAsync([FromBody]AdDeleteModel deleteModel)
         {
-            await _adsService.DeleteAsync(id);
+            var model = _mapper.Map<AdModel>(deleteModel);
+            model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            await _adsService.DeleteAsync(model);
         }
+
         [Route("{id}")]
         [HttpPut]
         [Authorize(Roles = "User")]

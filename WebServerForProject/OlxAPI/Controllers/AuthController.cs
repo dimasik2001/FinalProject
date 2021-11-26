@@ -25,13 +25,13 @@ namespace OlxAPI.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly JwtBearerTokenSettings jwtBearerTokenSettings;
-        private readonly UserManager<User> userManager;
+        private readonly JwtBearerTokenSettings _jwtBearerTokenSettings;
+        private readonly UserManager<User> _userManager;
         public AuthController(IOptions<JwtBearerTokenSettings> jwtTokenOptions,
             UserManager<User> userManager)
         {
-            this.jwtBearerTokenSettings = jwtTokenOptions.Value;
-            this.userManager = userManager;
+            _jwtBearerTokenSettings = jwtTokenOptions.Value;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -44,10 +44,10 @@ namespace OlxAPI.Controllers
             }
 
             var identityUser = new User() { UserName = userDetails.Username, Email = userDetails.Email};
-            var result = await userManager.CreateAsync(identityUser, userDetails.Password);
+            await _userManager.CreateAsync(identityUser, userDetails.Password);
             var roleName = RolesEnum.User.GetEnumDescription();
 
-            await userManager.AddToRoleAsync(identityUser, roleName);
+            var result = await _userManager.AddToRoleAsync(identityUser, roleName);
 
 
             if (!result.Succeeded)
@@ -60,6 +60,7 @@ namespace OlxAPI.Controllers
 
                 return new BadRequestObjectResult(new { Message = "User Registration Failed", Errors = dictionary });
             }
+
 
             return Ok(new { Message = "User Reigstration Successful" });
         }
@@ -76,7 +77,7 @@ namespace OlxAPI.Controllers
             {
                 return new BadRequestObjectResult(new { Message = "Login failed" });
             }
-            var roles = await userManager.GetRolesAsync(identityUser);
+            var roles = await _userManager.GetRolesAsync(identityUser);
             var token = GenerateToken(identityUser, roles);
 
             return Ok(
@@ -88,7 +89,7 @@ namespace OlxAPI.Controllers
         private string GenerateToken(User identityUser, IList<string> roles)
         {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(jwtBearerTokenSettings.SecretKey);
+                var key = Encoding.ASCII.GetBytes(_jwtBearerTokenSettings.SecretKey);
 
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
@@ -100,11 +101,11 @@ namespace OlxAPI.Controllers
                     new Claim(ClaimTypes.Role, string.Join(',', roles))
                     }),
 
-                    Expires = DateTime.Now.AddSeconds(jwtBearerTokenSettings.ExpiryTimeInSeconds),
+                    Expires = DateTime.Now.AddSeconds(_jwtBearerTokenSettings.ExpiryTimeInSeconds),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature),
-                    Audience = jwtBearerTokenSettings.Audience,
-                    Issuer = jwtBearerTokenSettings.Issuer
+                    Audience = _jwtBearerTokenSettings.Audience,
+                    Issuer = _jwtBearerTokenSettings.Issuer
                 };
 
                 var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -115,11 +116,11 @@ namespace OlxAPI.Controllers
 
         private async Task<User> ValidateUserAsync(LoginCredentials credentials)
         {
-            var identityUser = await userManager.FindByEmailAsync(credentials.Email);
+            var identityUser = await _userManager.FindByEmailAsync(credentials.Email);
 
             if (identityUser != null)
             {
-                var result = userManager.PasswordHasher.VerifyHashedPassword(identityUser, identityUser.PasswordHash, credentials.Password);
+                var result = _userManager.PasswordHasher.VerifyHashedPassword(identityUser, identityUser.PasswordHash, credentials.Password);
                 return result == PasswordVerificationResult.Failed ? null : identityUser;
             }
 

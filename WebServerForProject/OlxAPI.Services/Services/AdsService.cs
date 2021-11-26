@@ -27,34 +27,45 @@ namespace OlxAPI.Services.Services
             FilterParametersModel filterModel,
             SortParametersModel sortModel)
         {
-            if(paginationModel.Page == null || paginationModel.PageSize == null)
+            if (paginationModel.Page == null || paginationModel.PageSize == null)
             {
                 SetDefaultPaginationParametrs(paginationModel);
             }
+
             var pagination = _mapper.Map<PaginationParameters>(paginationModel);
             var filter = _mapper.Map<FilterParameters>(filterModel);
-            var sort= _mapper.Map<SortParameters>(sortModel);
+            var sort = _mapper.Map<SortParameters>(sortModel);
+
             var entities = await _repository.GetAsync(pagination, filter, sort);
             _mapper.Map(pagination, paginationModel);
+
             return _mapper.Map<IEnumerable<AdModel>>(entities);
         }
 
         public async Task<AdModel> GetAsync(int id)
         {
             var entity = await _repository.GetByIdAsync(id);
+
             return _mapper.Map<AdModel>(entity);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(AdModel model)
         {
-            await _repository.DeleteAsync(id);
+            var entity = await _repository.GetByIdAsync(model.Id);
+
+            if (entity.UserId == model.UserId)
+            {
+                await _repository.DeleteAsync(entity.Id);
+            }
         }
         public async Task<AdModel> UpdateAsync(AdModel model)
         {
             var entity = _mapper.Map<Ad>(model);
             await _repository.UpdateAsync(entity);
+
             var updatedEntity = await _repository.GetByIdAsync(entity.Id);
             model = _mapper.Map<AdModel>(updatedEntity);
+
             return model;
         }
 
@@ -62,14 +73,16 @@ namespace OlxAPI.Services.Services
         {
             var entity = _mapper.Map<Ad>(model);
             await _repository.CreateAsync(entity);
+
             var newEntity = await _repository.GetByIdAsync(entity.Id);
             model = _mapper.Map<AdModel>(newEntity);
+
             return model;
         }
         public void SetDefaultPaginationParametrs(PaginationParametersModel parametersModel)
         {
-            parametersModel.Page = parametersModel.Page??1;
-            parametersModel.PageSize = parametersModel.PageSize??5;
+            parametersModel.Page = parametersModel.Page ?? 1;
+            parametersModel.PageSize = parametersModel.PageSize ?? 5;
         }
     }
 }

@@ -41,6 +41,8 @@ namespace OlxAPI
             var connectionString = Configuration["ConnectionStrings:SqlConnection"];
             services.AddTransient<IAdsService, AdsService>();
             services.AddTransient<IAdsRepository, AdsRepository>();
+            services.AddTransient<IImagesService, ImagesService>();
+            services.AddTransient<IImagesRepository, ImagesRepository>();
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile(new MapperProfile());
