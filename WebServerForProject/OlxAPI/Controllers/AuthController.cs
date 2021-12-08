@@ -23,15 +23,14 @@ namespace OlxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : IdentityControllerBase<User>
     {
         private readonly JwtBearerTokenSettings _jwtBearerTokenSettings;
-        private readonly UserManager<User> _userManager;
         public AuthController(IOptions<JwtBearerTokenSettings> jwtTokenOptions,
             UserManager<User> userManager)
+            :base(userManager)
         {
             _jwtBearerTokenSettings = jwtTokenOptions.Value;
-            _userManager = userManager;
         }
 
         [HttpPost]
@@ -67,7 +66,7 @@ namespace OlxAPI.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginCredentials credentials)
+        public async Task<object> Login([FromBody] LoginCredentials credentials)
         {
             User identityUser;
 
@@ -83,7 +82,13 @@ namespace OlxAPI.Controllers
             return Ok(
                 new
                 {
-                    AccessToken = token
+                    AccessToken = token,
+                    UserId = identityUser.Id,
+                    UserName = identityUser.UserName,
+                    Email = identityUser.Email,
+                    ImageUrl = identityUser.ImagePath,
+                    Roles = roles,
+                    isLogin = true
                 });
         }
         private string GenerateToken(User identityUser, IList<string> roles)

@@ -20,6 +20,7 @@ using OlxAPI.Data;
 using OlxAPI.Data.Entities;
 using OlxAPI.Data.Repositories;
 using OlxAPI.Data.Repositories.Abstractions;
+using OlxAPI.Helpers;
 using OlxAPI.Mapper;
 using OlxAPI.Services.Services;
 using OlxAPI.Services.Services.Abstractions;
@@ -43,6 +44,7 @@ namespace OlxAPI
             services.AddTransient<IAdsRepository, AdsRepository>();
             services.AddTransient<IImagesService, ImagesService>();
             services.AddTransient<IImagesRepository, ImagesRepository>();
+            services.AddTransient<UserHelper>();
             services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile(new MapperProfile());
@@ -93,7 +95,7 @@ namespace OlxAPI
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
-
+            app.UseHttpsRedirection();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

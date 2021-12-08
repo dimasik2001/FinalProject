@@ -49,17 +49,14 @@ namespace OlxAPI.Services.Services
             return _mapper.Map<AdModel>(entity);
         }
 
-        public async Task DeleteAsync(AdModel model)
+        public async Task DeleteAsync(int id)
         {
-            var entity = await _repository.GetByIdAsync(model.Id);
-
-            if (entity.UserId == model.UserId)
-            {
-                await _repository.DeleteAsync(entity.Id);
-            }
+            var entity = await _repository.GetByIdAsync(id);
+            await _repository.DeleteAsync(entity.Id);
         }
         public async Task<AdModel> UpdateAsync(AdModel model)
         {
+
             var entity = _mapper.Map<Ad>(model);
             await _repository.UpdateAsync(entity);
 
@@ -79,10 +76,17 @@ namespace OlxAPI.Services.Services
 
             return model;
         }
+
+        public async Task<IEnumerable<CategoryModel>> GetCategories()
+        {
+            var entities = await _repository.GetCategories();
+            var models = _mapper.Map<IEnumerable<CategoryModel>>(entities);
+            return models;
+        }
         public void SetDefaultPaginationParametrs(PaginationParametersModel parametersModel)
         {
             parametersModel.Page = parametersModel.Page ?? 1;
-            parametersModel.PageSize = parametersModel.PageSize ?? 5;
+            parametersModel.PageSize = parametersModel.PageSize ?? 6;
         }
     }
 }

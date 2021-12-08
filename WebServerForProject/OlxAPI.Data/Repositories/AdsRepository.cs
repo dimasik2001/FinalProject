@@ -22,26 +22,27 @@ namespace OlxAPI.Data.Repositories
             FilterParameters filter = null,
             SortParameters sort = null)
         {
-           
+
             IQueryable<Ad> result = _ctx.Ads;
             if (filter?.Predicates != null)
             {
                 foreach (var predicate in filter.Predicates)
                 {
-                   result = result.Where(predicate);
-                }    
+                    result = result.Where(predicate);
+                }
             }
             var skipCount = (pagination.Page - 1) * pagination.PageSize;
             var takeCount = pagination.PageSize;
-            pagination.TotalPages = (int)Math.Ceiling(result.Count() / (double)pagination.PageSize);
+            //pagination.TotalPages = (int)Math.Ceiling(result.Count() / (double)pagination.PageSize);
+            pagination.Total = result.Count();
 
             if (sort != null)
             {
-                if(sort.IsAscending)
+                if (sort.IsAscending)
                 {
                     result = result.OrderBy(sort.SortFunc);
                 }
-                else 
+                else
                 {
                     result = result.OrderByDescending(sort.SortFunc);
                 }
@@ -68,7 +69,7 @@ namespace OlxAPI.Data.Repositories
         public async Task CreateAsync(Ad ad)
         {
             ad.ChangeDate = DateTime.UtcNow;
-            await _ctx.Ads.AddAsync(ad); 
+            await _ctx.Ads.AddAsync(ad);
             await _ctx.SaveChangesAsync();
         }
         public async Task DeleteAsync(int id)
@@ -81,19 +82,19 @@ namespace OlxAPI.Data.Repositories
         public async Task UpdateAsync(Ad ad)
         {
             var current = await _ctx.Ads.FindAsync(ad.Id);
-            if(current.UserId != ad.UserId)
-            {
-                return;
-            }
             _ctx.AdsCategories.RemoveRange(_ctx.AdsCategories.Where(c => c.AdId == ad.Id));
             current.Header = ad.Header;
             current.Description = ad.Description;
-            current.Images = ad.Images;
             current.ChangeDate = DateTime.UtcNow;
             current.AdsCategories = ad.AdsCategories;
             current.Price = ad.Price;
 
             await _ctx.SaveChangesAsync();
         }
+        public async Task<IEnumerable<Category>> GetCategories()
+        {
+            return await Task.Run(()=> _ctx.Categories.AsNoTracking());
+        }
+
     }
 }

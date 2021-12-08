@@ -6,10 +6,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OlxAPI.Data.Entities;
+using OlxAPI.Helpers;
 using OlxAPI.Models.PostModels;
 using OlxAPI.Services.Services;
 using OlxAPI.Services.Services.Abstractions;
@@ -18,53 +20,90 @@ namespace OlxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ImagesController : ControllerBase
+    public class ImagesController : IdentityControllerBase<User>
     {
-        private UserManager<User> _userManager;
-        private IImagesService _imagesService;
-
-        public ImagesController(UserManager<User> userManager, IImagesService imagesService)
+        private readonly IWebHostEnvironment _appEnvironment;
+        private readonly UserHelper _userHelper;
+        private readonly IImagesService _imagesService;
+        private const string _profilesPath = "profiles";
+        private const string _adsPath = "ads";
+        public ImagesController(UserManager<User> userManager, IImagesService imagesService, IWebHostEnvironment appEnvironment, UserHelper userHelper)
+            :base(userManager)
         {
-            _userManager = userManager;
             _imagesService = imagesService;
-        } 
+            _appEnvironment = appEnvironment;
+            _userHelper = userHelper;
+        }
         [HttpPost]
         [Route("profile")]
         [Authorize(Roles = "User")]
-        public async Task AddProfileIcon([FromBody] IconPostModel iconPostModel)
+        public async Task AddProfileIcon([FromForm] IFormFile image)
         {
-            var user = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            var imagePath = $"wwwroot/profiles/{user.Email}.jpg";
-            Base64ToFile(iconPostModel.encodedImage, imagePath);
+            var temp = HttpContext.Request.Form.Files;
+            if (image is null)
+            {
+                return;
+            }
+            var user = await GetIdentityUserAsync();
+            var imagePath = Path.Combine(_appEnvironment.WebRootPath, user.ImagePath);
 
-            await _imagesService.AddUserIconAsync(imagePath.Trim("wwwroot/".ToCharArray()), user.Id);
+            _imagesService.DeleteFile(imagePath);
+
+            var imageName = await SaveFormFile(image, Path.Combine(_appEnvironment.WebRootPath, _profilesPath));
+            await _imagesService.AddUserIconAsync(Path.Combine(_profilesPath, imageName), user.Id);
         }
 
         [HttpPost]
-        [Route("profile/{adId}")]
-        [Authorize(Roles ="User")]
-        public async Task AddImagesToAd([FromBody] ImagesPostModel imagesPostModel, int adId)
+        [Route("ads/{adId}")]
+        [Authorize(Roles = "User")]
+        public async Task AddImagesToAd([FromForm]IFormFileCollection images, int adId)
         {
-            var user = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            var pathList = new List<string>();
-            foreach (var encodedImage in imagesPostModel.encodedImages)
+            var user = await GetIdentityUserAsync();
+            if(images is null || images.Count == 0)
             {
-                var imagePath = $"wwwroot/ads/{Guid.NewGuid()}.jpg";
-                Base64ToFile(encodedImage, imagePath);
-                pathList.Add(imagePath.Trim("wwwroot/".ToCharArray()));
+                return;
             }
-           await _imagesService.AddPhotosAsync(pathList, adId, user.Id);
-            
+            var isOwner = await _userHelper.IsOwner(user.Id, adId);
+            if(!isOwner)
+            {
+                throw new BadHttpRequestException("Forbidden", 403);
+            }
+            var pathList = new List<string>();
+            foreach (var image in images)
+            {
+                var imageName = await SaveFormFile(image, Path.Combine(_appEnvironment.WebRootPath, _adsPath));
+                pathList.Add(Path.Combine(_adsPath, imageName));
+            }
+            await _imagesService.AddImagesAsync(pathList, adId);
         }
 
-        private void Base64ToFile(string encodedImage, string fileName)
+
+        [HttpPost]
+        [Route("ads/delete/{adId}")]
+        [Authorize(Roles = "User")]
+        public async Task DeleteImagesFromAd(ICollection<string> paths, int adId)
         {
-            var bytes = Convert.FromBase64String(encodedImage);
-            using(var ms = new MemoryStream(bytes))
+            var user = await GetIdentityUserAsync();
+            var isOwner = await _userHelper.IsOwner(user.Id, adId);
+            
+            if (!isOwner)
             {
-                var image = System.Drawing.Image.FromStream(ms);
-                image.Save(fileName);
+                throw new BadHttpRequestException("Forbidden", 403);
             }
+
+            foreach (var path in paths)
+            {
+                var fullPath = Path.Combine(_appEnvironment.WebRootPath, path);
+                _imagesService.DeleteFile(fullPath);
+            }
+            await _imagesService.DeleteImagesAsync(paths, adId);
+        }
+
+        private async Task<string> SaveFormFile(IFormFile file, string path)
+        {
+            using var readStream = file.OpenReadStream();
+            var fileName = await _imagesService.SaveFormFile(readStream, path, file.FileName);
+            return fileName;
         }
     }
 }

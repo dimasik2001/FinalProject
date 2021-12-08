@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using OlxAPI.Data.Repositories.Abstractions;
@@ -17,18 +18,40 @@ namespace OlxAPI.Services.Services
             _imagesRepository = repository;
             _adsRepository = adsRepository;
         }
-        public async Task AddPhotosAsync(IEnumerable<string> Imagepaths, int adId, string userId)
+        public async Task AddImagesAsync(IEnumerable<string> imagepaths, int adId)
         {
-            var adModel = await _adsRepository.GetByIdAsync(adId);
-            if(userId == adModel.UserId)
-            {
-                await _imagesRepository.AddPhotosAsync(Imagepaths, adId);
-            }
+            await _imagesRepository.AddImagesAsync(imagepaths, adId);
+
         }
 
         public async Task AddUserIconAsync(string Iconpath, string userId)
         {
             await _imagesRepository.AddUserIconAsync(Iconpath, userId);
+        }
+        public async Task DeleteImagesAsync(IEnumerable<string> imagepaths, int adId)
+        {
+            await _imagesRepository.DeleteImagesAsync(imagepaths, adId);
+        }
+
+        public bool DeleteFile(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<string> SaveFormFile(Stream stream, string directoryPath, string fileExtension)
+        {
+            fileExtension = Path.GetExtension(fileExtension);
+            var newFileName = $"{Guid.NewGuid()}{fileExtension}";
+            var fullPath = Path.Combine(directoryPath, newFileName);
+            var buffer = new byte[stream.Length];
+            await stream.ReadAsync(buffer, 0, buffer.Length);
+            await File.WriteAllBytesAsync(fullPath, buffer);
+            return newFileName;
         }
     }
 }

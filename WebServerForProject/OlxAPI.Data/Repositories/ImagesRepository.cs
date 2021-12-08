@@ -16,11 +16,11 @@ namespace OlxAPI.Data.Repositories
         {
             _ctx = ctx;
         }
-        public async Task AddPhotosAsync(IEnumerable<string> Imagepaths, int adId)
+        public async Task AddImagesAsync(IEnumerable<string> imagepaths, int adId)
         {
             var ad = await _ctx.Ads.FindAsync(adId);
-            var images = Imagepaths.Select(p => new Image { Path = p });
-            if(ad.Images == null)
+            var images = imagepaths.Select(p => new Image { Path = p });
+            if (ad.Images == null)
             {
                 ad.Images = new List<Image>();
             }
@@ -31,10 +31,21 @@ namespace OlxAPI.Data.Repositories
             await _ctx.SaveChangesAsync();
         }
 
-        public async Task AddUserIconAsync(string Iconpath, string userId)
+        public async Task AddUserIconAsync(string IconPath, string userId)
         {
             var user = await _ctx.Users.FindAsync(userId);
-            user.ImagePath = Iconpath;
+            user.ImagePath = IconPath;
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task DeleteImagesAsync(IEnumerable<string> imagepaths, int adId)
+        {
+            var images = _ctx.Images.Where(i => i.AdId == adId);
+            var imagesToDelete = images.Where(i => imagepaths.Contains(i.Path));
+            foreach (var img in imagesToDelete)
+            {
+                _ctx.Images.Remove(img);
+            }
             await _ctx.SaveChangesAsync();
         }
     }

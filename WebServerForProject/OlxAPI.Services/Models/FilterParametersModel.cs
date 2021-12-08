@@ -13,5 +13,6 @@ namespace OlxAPI.Services.Models
         public DateTime? DateTo { get; set; }
         public decimal? PriceFrom { get; set; }
         public decimal? PriceTo { get; set; }
+        public string KeyWords { get; set; }
     }
 }

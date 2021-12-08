@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using OlxAPI.Data.Entities;
@@ -73,6 +74,12 @@ namespace OlxAPI.Mapper
                                 break;
                         }
                     }
+
+                    if(!string.IsNullOrEmpty(src.KeyWords))
+                    {
+                        dest.Predicates.Add(ad => ad.Header.Contains(src.KeyWords));
+                    }
+
                     if(dest.Predicates.Count == 0)
                     {
                         return null;

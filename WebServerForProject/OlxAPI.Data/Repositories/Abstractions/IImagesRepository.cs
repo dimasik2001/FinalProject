@@ -7,7 +7,7 @@ namespace OlxAPI.Data.Repositories.Abstractions
     {
         Task AddUserIconAsync(string Iconpath, string userId);
 
-        Task AddPhotosAsync(IEnumerable<string> Imagepaths, int adId);
-
+        Task AddImagesAsync(IEnumerable<string> Imagepaths, int adId);
+        Task DeleteImagesAsync(IEnumerable<string> imagepaths, int adId);
     }
 }

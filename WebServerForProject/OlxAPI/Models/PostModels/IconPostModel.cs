@@ -7,6 +7,6 @@ namespace OlxAPI.Models.PostModels
 {
     public class IconPostModel
     {
-        public string encodedImage { get; set; }
+        public string EncodedImage { get; set; }
     }
 }

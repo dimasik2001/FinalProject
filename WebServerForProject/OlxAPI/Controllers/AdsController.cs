@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using OlxAPI.Data.Entities;
+using OlxAPI.Helpers;
+using OlxAPI.Models;
 using OlxAPI.Models.DeleteModels;
 using OlxAPI.Models.PostModels;
 using OlxAPI.Models.PostModels.Parameters;
@@ -18,19 +25,30 @@ namespace OlxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdsController : ControllerBase
+    public class AdsController : IdentityControllerBase<User>
     {
-        private IAdsService _adsService;
-        private IMapper _mapper;
+        private readonly IAdsService _adsService;
+        private readonly IMapper _mapper;
+        private readonly UserHelper _userHelper;
+        private readonly IImagesService _imagesService;
+        private readonly IWebHostEnvironment _appEnvironment;
 
-        public AdsController(IAdsService adsService, IMapper mapper)
+        public AdsController(IAdsService adsService,
+            IMapper mapper,
+            UserManager<User> userManager,
+            UserHelper userHelper,
+            IWebHostEnvironment appEnvironment, IImagesService imagesService)
+            : base(userManager)
         {
+            _appEnvironment = appEnvironment;
             _adsService = adsService;
             _mapper = mapper;
+            _userHelper = userHelper;
+            _imagesService = imagesService;
         }
 
         [HttpGet]
-        public async Task<object> GetAsync([FromQuery]PaginationQueryParameters paginationParams,
+        public async Task<object> GetAsync([FromQuery] PaginationQueryParameters paginationParams,
             [FromQuery] FilterQueryParameters filterParams,
             [FromQuery] SortQueryParameters sortParams)
         {
@@ -41,7 +59,7 @@ namespace OlxAPI.Controllers
             var AdViewModel = _mapper.Map<IEnumerable<AdViewModel>>(adModel);
             var parametersViewModel = _mapper.Map<PaginationParametersModel>(paginationModel);
 
-            return new { Ad = AdViewModel, paginationParameters = parametersViewModel };
+            return new { Ads = AdViewModel, paginationParameters = parametersViewModel };
         }
 
 
@@ -54,35 +72,63 @@ namespace OlxAPI.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "User")]
+        [Authorize()]
         public async Task<AdViewModel> CreateAsync([FromBody] AdPostModel postModel)
         {
             var model = _mapper.Map<AdModel>(postModel);
-            model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            var user = await GetIdentityUserAsync();
+            model.UserId = user.Id;
             var newModel = await _adsService.CreateAsync(model);
             return _mapper.Map<AdViewModel>(newModel);
         }
 
         [HttpDelete]
-        [Authorize(Roles = "User")]
-        public async Task DeleteAsync([FromBody]AdDeleteModel deleteModel)
+        [Route("{adId}")]
+        [Authorize()]
+        public async Task DeleteAsync(int adId)
         {
-            var model = _mapper.Map<AdModel>(deleteModel);
-            model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            await _adsService.DeleteAsync(model);
+            var user = await GetIdentityUserAsync();
+            var ad = await _adsService.GetAsync(adId);
+            var isOwner = await _userHelper.IsOwner(user.Id, adId);
+            var isAdmin = await _userHelper.IsAdmin(user);
+            if (isOwner || isAdmin)
+            {
+                foreach (var item in ad.Images)
+                {
+                    _imagesService.DeleteFile(Path.Combine(_appEnvironment.WebRootPath, item));
+                }
+                
+                await _adsService.DeleteAsync(adId);
+            }
         }
 
         [Route("{id}")]
         [HttpPut]
-        [Authorize(Roles = "User")]
-        public async Task<AdViewModel> UpdateAsync([FromBody]AdPostModel postModel, int id)
+        [Authorize()]
+        public async Task<AdViewModel> UpdateAsync([FromBody] AdPostModel postModel, int id)
         {
-            var model = _mapper.Map<AdModel>(postModel);
-            model.Id = id;
-            model.UserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value;
-            var newModel = await _adsService.UpdateAsync(model);
-            return _mapper.Map<AdViewModel>(newModel);
+
+            var user = await GetIdentityUserAsync();
+            var isOwner = await _userHelper.IsOwner(user.Id, id);
+            if (isOwner)
+            {
+                var model = _mapper.Map<AdModel>(postModel);
+                model.Id = id;
+                model.UserId = user.Id;
+                var newModel = await _adsService.UpdateAsync(model);
+                return _mapper.Map<AdViewModel>(newModel);
+            }
+            throw new BadHttpRequestException("Forbidden", 403);
+
         }
 
+        [Route("categories")]
+        [HttpGet]
+        public async Task<IEnumerable<CategoryViewModel>> GetCategories()
+        {
+            var models = await _adsService.GetCategories();
+            var viewModels = _mapper.Map<IEnumerable<CategoryViewModel>>(models);
+            return viewModels;
+        }
     }
 }

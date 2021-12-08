@@ -21,6 +21,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\profiles\" />
     <Folder Include="wwwroot\ads\" />
+    <Folder Include="wwwroot\unset\" />
   </ItemGroup>
 
 

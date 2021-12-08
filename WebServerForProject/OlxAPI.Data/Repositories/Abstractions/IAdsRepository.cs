@@ -14,5 +14,6 @@ namespace OlxAPI.Data.Repositories.Abstractions
             SortParameters sort = null);
         Task<Ad> GetByIdAsync(int id);
         Task UpdateAsync(Ad ad);
+        Task<IEnumerable<Category>> GetCategories();
     }
 }

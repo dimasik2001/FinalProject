@@ -18,6 +18,11 @@ namespace OlxAPI.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.Entity<User>()
+                .HasMany(i => i.Ads)
+                .WithOne(i => i.User)
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
             builder.Entity<Category>().HasData(new Category
             {
                 Id = 1,

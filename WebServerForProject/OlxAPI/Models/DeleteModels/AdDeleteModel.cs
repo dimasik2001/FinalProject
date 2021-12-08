@@ -8,6 +8,5 @@ namespace OlxAPI.Models.DeleteModels
     public class AdDeleteModel
     {
         public int Id { get; set; }
-        
     }
 }

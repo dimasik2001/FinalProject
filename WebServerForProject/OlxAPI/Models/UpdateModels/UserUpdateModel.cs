@@ -4,14 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OlxAPI.Models.PostModels
+namespace OlxAPI.Models.UpdateModels
 {
-    public class UserPostModel
+    public class UserUpdateModel
     {
-        public string Username { get; set; }
-
+        public string UserName { get; set; }
         public string Password { get; set; }
-        
+        public string OldPassword { get; set; }
+        [EmailAddress]
         public string Email { get; set; }
     }
 }
