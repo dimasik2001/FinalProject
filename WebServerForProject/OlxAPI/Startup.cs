@@ -22,6 +22,8 @@ using OlxAPI.Data.Repositories;
 using OlxAPI.Data.Repositories.Abstractions;
 using OlxAPI.Helpers;
 using OlxAPI.Mapper;
+using OlxAPI.Services;
+using OlxAPI.Services.Abstractions;
 using OlxAPI.Services.Services;
 using OlxAPI.Services.Services.Abstractions;
 
@@ -44,6 +46,7 @@ namespace OlxAPI
             services.AddTransient<IAdsRepository, AdsRepository>();
             services.AddTransient<IImagesService, ImagesService>();
             services.AddTransient<IImagesRepository, ImagesRepository>();
+            services.AddTransient<IDbInitializer, DbInitializer>();
             services.AddTransient<UserHelper>();
             services.AddAutoMapper(cfg =>
             {
@@ -80,7 +83,7 @@ namespace OlxAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
         {
             app.UseCors(x => x
                .AllowAnyOrigin()
@@ -97,11 +100,14 @@ namespace OlxAPI
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseAuthorization();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            var seedTask = dbInitializer.Seed();
+            seedTask.Wait();
         }
     }
 }

@@ -12,7 +12,7 @@ export const updateProfile = (profileModel) => async dispatch => {
         if(profileModel.image != null)
         {
             let formData = new FormData();
-            formData.append("images", profileModel.image);
+            formData.append("image", profileModel.image);
 
             await axios.post(`${host}api/images/profile`, formData, authWithContentType)
         }

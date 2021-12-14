@@ -9,7 +9,7 @@ import { LOGIN,LOGIN_ERROR } from '../types'
      imageUrl: '',
      roles: [],
      isLogin: false
-     }
+     },
  }
 
 
@@ -22,13 +22,15 @@ export default function (state = initialState, action) {
             localStorage.setItem('userData', JSON.stringify(action.payload))
             return{
                 ...state,
-                userData: action.payload
+                userData: action.payload,
+                message: ''
             }
         case LOGIN_ERROR:
             console.log("LOGIN ERROR");
             return{
                 ...state,
-                userData: initialState.userData
+                userData: initialState.userData,
+                message: 'Login failed'
             }
         default:
              return state

@@ -4,6 +4,7 @@ import host from './host/hostName'
 
 export const login = (userCredentials) => async dispatch => {
     try{
+        debugger
         const res = await axios.post(`${host}api/auth/login`, userCredentials)
         console.log(res);
         dispatch({

@@ -6,7 +6,7 @@ using OlxAPI.Data.Entities;
 
 namespace OlxAPI.Data
 {
-    public class ApplicationDbContext: IdentityDbContext<User>
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
@@ -61,15 +61,49 @@ namespace OlxAPI.Data
             new Category
             {
                 Id = 8,
+                Name = "Animals",
+            },
+            new Category
+            {
+                Id = 9,
+                Name = "Home",
+            },
+            new Category
+            {
+                Id = 10,
+                Name = "Children",
+            },
+            new Category
+            {
+                Id = 11,
+                Name = "Beauty",
+            },
+            new Category
+            {
+                Id = 12,
+                Name = "Business and services",
+            },
+            new Category
+            {
+                Id = 13,
+                Name = "Education",
+            },
+            new Category
+            {
+                Id = 14,
+                Name = "Books",
+            },
+            new Category
+            {
+                Id = 15,
+                Name = "Realty",
+            },
+            new Category
+            {
+                Id = 16,
                 Name = "Other",
             }
             );
-            var admin = new IdentityRole("Admin");
-            admin.NormalizedName = admin.Name.ToUpper();
-            var user = new IdentityRole("User");
-            user.NormalizedName = user.Name.ToUpper();
-            builder.Entity<IdentityRole>().HasData(
-                admin, user);
         }
     }
 }

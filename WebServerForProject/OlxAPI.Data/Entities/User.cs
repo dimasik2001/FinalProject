@@ -9,5 +9,6 @@ namespace OlxAPI.Data.Entities
     {
         public string ImagePath { get; set; }
         public ICollection<Ad> Ads { get; set; }
+        public bool IsBlocked { get; set; }
     }
 }

@@ -99,16 +99,17 @@ namespace OlxAPI.Controllers
             return new { Ads = AdViewModel, paginationParameters = parametersViewModel };
         }
 
-        [HttpDelete]
-        [Route("{id}")]
+        [HttpPut]
+        [Route("{id}/{isBlocked}")]
         [Authorize(Roles ="Admin")]
-        public async Task DeleteAsync(string id)
+        public async Task BlockAsync(string id, bool isBlocked)
         {
-            var deleteUser = await _userManager.FindByIdAsync(id);
-            var isAdmin = await _userHelper.IsAdmin(deleteUser);
+            var blockUser = await _userManager.FindByIdAsync(id);
+            var isAdmin = await _userHelper.IsAdmin(blockUser);
             if (!isAdmin)
             {
-                var res = await _userManager.DeleteAsync(deleteUser);
+                blockUser.IsBlocked = isBlocked;
+                await _userManager.UpdateAsync(blockUser);
             }
             else
             {

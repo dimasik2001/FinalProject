@@ -1,14 +1,13 @@
-import { GET_USERS, DELETE_USER, USERS_ERROR} from '../types'
+import { USERS_ERROR} from '../types'
 import { auth } from '../requestConfigs/requestConfig'
 import axios from 'axios'
 import host from './host/hostName'
-export const deleteUser = (id) => async (dispatch) => {
+export const blockUser = (id, isBlocked) => async (dispatch) => {
     try{
         debugger
-        await axios.delete(`${host}api/users/${id}`,auth)
+        await axios.put(`${host}api/users/${id}/${isBlocked}`,null,auth)
 
         dispatch({
-            type: DELETE_USER
         })
     }
     catch(e){

@@ -72,7 +72,8 @@ namespace OlxAPI.Controllers
 
             if (!ModelState.IsValid
                 || credentials == null
-                || (identityUser = await ValidateUserAsync(credentials)) == null)
+                || (identityUser = await ValidateUserAsync(credentials)) == null
+                ||identityUser.IsBlocked)
             {
                 return new BadRequestObjectResult(new { Message = "Login failed" });
             }

@@ -28,6 +28,7 @@ export default function App() {
           <Route path="/register" render={() => <div><RegisterForm /> <Link to="/login"> To login</Link> </div>} />
           <Route path="/login" render={() => <div><LoginForm /> <Link to="/register"> To registration</Link> </div>} />
           <Route path="/users" render={() => <Users />} />
+          <Route exact path="/" render={() => <><FilterControl/><Ads/></>} />
           <Route exact path="/ads" render={() => <><FilterControl/><Ads/></>} />
           <Route path = "/ads/:id" component = {AdViewer}></Route>
           <Route path="/myAds" render={() => <><Ads displayMode="my"/></>} />

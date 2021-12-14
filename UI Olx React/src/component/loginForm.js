@@ -33,7 +33,9 @@ class loginForm extends Component {
     }
 
     render() {
+        let message = this.props?.message;
         return (
+            <>
             <Form className="mt-5">
                 <Form.Group as={Row} className="mb-3" controlId="formPlaintextEmail">
                     <Form.Label column sm="5">
@@ -53,11 +55,13 @@ class loginForm extends Component {
                     </Col>
                 </Form.Group>
                <Button variant="primary" onClick={this.onLogin}>Login</Button>
-            </Form>            
+            </Form>     
+            {message}    
+            </>   
         )
     }
 
 }
 
-//const mapStateToProps  = (state) => ({loginForm: state.loginForm});
-export default connect(null, {login} )(loginForm);
+const mapStateToProps  = (state) => ({message: state?.loginForm?.message});
+export default connect(mapStateToProps, {login} )(loginForm);

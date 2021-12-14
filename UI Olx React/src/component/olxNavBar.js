@@ -2,14 +2,27 @@ import React, { Component, Profiler } from 'react'
 import { Navbar, Container, Nav } from 'react-bootstrap'
 import host from '../store/actions/host/hostName'
 export default class olxNavBar extends Component {
+  initUserData(){
+    return {
+      userName: '',
+      isLogin: false,
+      imageUrl: '',
+      id: '',
+      roles: [],
+    }
+  }
     render() {
         const retrievedStoreStr = localStorage.getItem('userData') 
-        const userData = JSON.parse(retrievedStoreStr) 
+        let userData = JSON.parse(retrievedStoreStr) 
         debugger
         let image
         let profileRef = "/profile";
         let profileAdsRef = `/myAds`
         let userName
+        if(userData == null || userData==undefined)
+        { 
+          userData = this.initUserData();
+        }
         if(userData.userName === '')
         {
             userName = "Guest";

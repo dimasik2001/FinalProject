@@ -45,9 +45,12 @@ namespace OlxAPI.Controllers
                 return;
             }
             var user = await GetIdentityUserAsync();
-            var imagePath = Path.Combine(_appEnvironment.WebRootPath, user.ImagePath);
+            if (user?.ImagePath != null)
+            {
+                var imagePath = Path.Combine(_appEnvironment.WebRootPath, user.ImagePath);
 
-            _imagesService.DeleteFile(imagePath);
+                _imagesService.DeleteFile(imagePath);
+            }
 
             var imageName = await SaveFormFile(image, Path.Combine(_appEnvironment.WebRootPath, _profilesPath));
             await _imagesService.AddUserIconAsync(Path.Combine(_profilesPath, imageName), user.Id);

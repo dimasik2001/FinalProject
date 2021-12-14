@@ -11,14 +11,15 @@ import '../styles.css'
 import 'photoswipe/dist/default-skin/default-skin.css'
 import { Gallery, Item } from 'react-photoswipe-gallery'
 import {saveToFavourite} from '../store/actions/cookiesAction'
-import { deleteUser } from '../store/actions/adminActions'
+import { blockUser } from '../store/actions/adminActions'
+import { Link } from 'react-router-dom'
 
 class adViewer extends Component {
 
     constructor(props) {
         super(props);
         this.onFavClick = this.onFavClick.bind(this)
-        this.onDeleteUserClick = this.onDeleteUserClick.bind(this)
+        this.onBlockUserClick = this.onBlockUserClick.bind(this)
         this.onDeleteAdClick = this.onDeleteAdClick.bind(this)
     }
 
@@ -29,9 +30,9 @@ class adViewer extends Component {
         debugger
         saveToFavourite(this.props.adViewer.ad);
     }
-    onDeleteUserClick(){
+    onBlockUserClick(isBlocked){
         debugger
-        this.props.deleteUser(this.props.adViewer.user.id)
+        this.props.blockUser(this.props.adViewer.user.id, isBlocked)
     }
     onDeleteAdClick(){
         this.props.deleteAd(this.props.adViewer.ad)
@@ -39,16 +40,27 @@ class adViewer extends Component {
     render() {
         debugger
         const { ad, user } = this.props.adViewer;
+        let imagePath;
         if(ad == null||ad==undefined || ad==''){
             return <div>Ad does non exist</div>
         }
+        if(user?.imagePath == undefined|| user?.imagePath == null || user?.imagePath =='')
+        {
+            imagePath = 'unset/profile.png'
+        }
+        else
+        {
+            imagePath = user.imagePath;
+        }
         const retrievedStoreStr = localStorage.getItem('userData') 
         const userData = JSON.parse(retrievedStoreStr) 
-        let deleteUserButton
+        let blockUserButton
+        let unBlockUserButton
         let deleteAdButton
         if(userData.roles.find((r) => r =="Admin") != undefined)
         {
-            deleteUserButton = <Button variant = "danger" onClick={this.onDeleteUserClick}> Delete</Button>
+            blockUserButton = <Button variant = "danger" onClick={() => this.onBlockUserClick(true)}> Block</Button>
+            unBlockUserButton = <Button variant = "success" onClick={() => this.onBlockUserClick(false)}> Unlock</Button>
             deleteAdButton = <Button variant = "danger" onClick={this.onDeleteAdClick}> Delete </Button>
         }
         return (
@@ -81,14 +93,15 @@ class adViewer extends Component {
                     <p><Button  variant = "dark"onClick = {this.onFavClick}>Add to Favourites</Button>{deleteAdButton}</p>
                 </div>
                 <div className="profile-card">
-                    <a href ={ `/ads?filterItem=userId&itemId=${user?.id}`}>
-                    <img src = {host + user?.imagePath}></img>
-                    </a>
+                    <Link to ={ `/ads?filterItem=userId&itemId=${user?.id}`}>
+                    <img src = {host + imagePath}></img>
+                    </Link>
                     <div>
                         <i>User name: </i> <b>{user?.userName}</b><br/>
                         <i>Email: </i> <b>{user?.email}</b><br/>
                            {user?.id}<br/>
-                           {deleteUserButton}
+                           {blockUserButton}
+                           {unBlockUserButton}
                     </div>
                 </div>
             </div>
@@ -99,4 +112,4 @@ class adViewer extends Component {
 }
 const mapStateToProps = (state) => ({ adViewer: state.adViewer });
 
-export default connect(mapStateToProps, { getAdInfoById, deleteUser,deleteAd })(adViewer);
+export default connect(mapStateToProps, { getAdInfoById, blockUser,deleteAd })(adViewer);
