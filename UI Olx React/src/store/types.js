@@ -1,0 +1,20 @@
+
+export const GET_USERS = 'GET_USERS';
+export const DELETE_USER = 'DELETE_USER';
+export const USERS_ERROR = 'USERS_ERROR';
+export const LOGIN = "LOGIN";
+export const LOGIN_ERROR = "LOGIN_ERROR";
+export const REGISTER = "REGISTER";
+export const REGISTER_ERROR = "REGISTER_ERROR";
+export const GET_ADS = "GET_ADS";
+export const ADS_ERROR = "ADS_ERROR";
+export const UPDATE_PROFILE = "UPDATE_PROFILE";
+export const PROFILE_ERROR = "PROFILE_ERROR";
+export const UNAUTHORIZED = "UNAUTHORIZED";
+export const GET_PROFILE = "GET_PROFILE";
+export const UPDATE_AD = "UPDATE_AD";
+export const CREATE_AD = "CREATE_AD";
+export const IMAGES_DELETED = "IMAGES_DELETED";
+export const DELETE_AD = "DELETE_AD";
+export const GET_AD = "GET_AD";
+export const AD_ERROR = "AD_ERROR";
